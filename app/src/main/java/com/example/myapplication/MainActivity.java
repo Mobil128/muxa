@@ -37,11 +37,12 @@ public class MainActivity extends AppCompatActivity {
     private Handler handler;
     private Random random;
 
-    // Звуковые проигрыватели для каждого направления
+    // Звуковые проигрыватели для каждого направления и для остановки игры
     private MediaPlayer soundUp;
     private MediaPlayer soundDown;
     private MediaPlayer soundLeft;
     private MediaPlayer soundRight;
+    private MediaPlayer soundStop;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +73,7 @@ public class MainActivity extends AppCompatActivity {
         soundDown = MediaPlayer.create(this, R.raw.asagi);
         soundLeft = MediaPlayer.create(this, R.raw.sola);
         soundRight = MediaPlayer.create(this, R.raw.saga);
+        soundStop = MediaPlayer.create(this, R.raw.sag); // Звук остановки игры
 
         // Установка значений по умолчанию
         speedInput.setText(String.valueOf(speed));
@@ -133,9 +135,14 @@ public class MainActivity extends AppCompatActivity {
                         break;
                 }
 
-                // Выводим положение игрока, даже если он вышел за границы
-                commandText.setText("Komanda: " + command + " - Oyunçu: (" + playerX + ", " + playerY + ")");
-                gameLoop(); // Продолжаем игру
+                // Проверяем, вышел ли игрок за границы
+                if (playerX < 1 || playerX > gridWidth || playerY < 1 || playerY > gridHeight) {
+                    stopGame(); // Останавливаем игру, если вышел за границы
+                } else {
+                    // Выводим положение игрока
+                    commandText.setText("Komanda: " + command + " - Oyunçu: (" + playerX + ", " + playerY + ")");
+                    gameLoop(); // Продолжаем игру
+                }
             }
         }, speed);
     }
@@ -164,6 +171,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void stopGame() {
         isPlaying = false;
+        soundStop.start(); // Воспроизводим звук остановки игры
         commandText.setText("Oyun dayandırıldı. Oyunçu: (" + playerX + ", " + playerY + ")");
     }
 
@@ -185,6 +193,10 @@ public class MainActivity extends AppCompatActivity {
         if (soundRight != null) {
             soundRight.release();
             soundRight = null;
+        }
+        if (soundStop != null) {
+            soundStop.release();
+            soundStop = null;
         }
     }
 }
