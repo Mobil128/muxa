@@ -3,7 +3,6 @@ package com.example.myapplication;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -34,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
     private int playerY;
     private int speed = 3; // По умолчанию 3 секунды
     private boolean isPlaying;
+    private boolean isStoppedByButton = false; // Новый флаг для ручной остановки
     private Handler handler;
     private Random random;
 
@@ -43,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
     private MediaPlayer soundLeft;
     private MediaPlayer soundRight;
     private MediaPlayer soundStop;
+    private MediaPlayer countdownSound; // Звук для отсчета
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
-        // Инициализация элементов интерфейса
+        // Инициализация элементов интерфейса и медиа плееров
         startButton = findViewById(R.id.startButton);
         stopButton = findViewById(R.id.stopButton);
         gridWidthInput = findViewById(R.id.gridWidthInput);
@@ -68,56 +69,93 @@ public class MainActivity extends AppCompatActivity {
         handler = new Handler();
         random = new Random();
 
-        // Загрузка звуков
+        // Звуки для направлений и остановки игры
         soundUp = MediaPlayer.create(this, R.raw.yuxari);
         soundDown = MediaPlayer.create(this, R.raw.asagi);
         soundLeft = MediaPlayer.create(this, R.raw.sola);
         soundRight = MediaPlayer.create(this, R.raw.saga);
-        soundStop = MediaPlayer.create(this, R.raw.sag); // Звук остановки игры
+        soundStop = MediaPlayer.create(this, R.raw.sag);
+        countdownSound = MediaPlayer.create(this, R.raw.countdown); // Звук отсчета
 
         // Установка значений по умолчанию
         speedInput.setText(String.valueOf(speed));
         gridWidthInput.setText(String.valueOf(gridWidth));
         gridHeightInput.setText(String.valueOf(gridHeight));
-        playerXInput.setText("3"); // Установка начальной позиции игрока по умолчанию
+        playerXInput.setText("3");
         playerYInput.setText("3");
 
-        startButton.setOnClickListener(v -> startGame());
-        stopButton.setOnClickListener(v -> stopGame());
+        startButton.setOnClickListener(v -> prepareGame());
+        stopButton.setOnClickListener(v -> stopGame(true)); // Остановка по нажатию кнопки
+    }
+
+    // Подготовка к началу игры с отсчетом
+    private void prepareGame() {
+        commandText.setText("Hazırlıq...");
+        countdownSound.start(); // Воспроизвести звук отсчета
+
+        isStoppedByButton = false; // Сбрасываем флаг ручной остановки
+
+        handler.postDelayed(this::startGame, 5000); // Задержка в 5 секунд перед стартом
     }
 
     private void startGame() {
         // Получение параметров от пользователя
-        gridWidth = Integer.parseInt(gridWidthInput.getText().toString());
-        gridHeight = Integer.parseInt(gridHeightInput.getText().toString());
-        speed = Integer.parseInt(speedInput.getText().toString()) * 1000; // Конвертируем в миллисекунды
-        playerX = Integer.parseInt(playerXInput.getText().toString());
-        playerY = Integer.parseInt(playerYInput.getText().toString());
+        try {
+            gridWidth = Integer.parseInt(gridWidthInput.getText().toString());
+            gridHeight = Integer.parseInt(gridHeightInput.getText().toString());
+            speed = Integer.parseInt(speedInput.getText().toString()) * 1000;
+            playerX = Integer.parseInt(playerXInput.getText().toString());
+            playerY = Integer.parseInt(playerYInput.getText().toString());
+        } catch (NumberFormatException e) {
+            Toast.makeText(this, "Все поля должны содержать целые числа!", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        // Проверка на корректность ввода
+        // Проверка корректности ввода
+        if (gridWidth <= 1) {
+            Toast.makeText(this, "Ширина сетки должна быть больше 1!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (gridHeight <= 1) {
+            Toast.makeText(this, "Высота сетки должна быть больше 1!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (speed < 0) {
+            Toast.makeText(this, "Скорость должна быть положительным числом!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         if (playerX < 1 || playerX > gridWidth || playerY < 1 || playerY > gridHeight) {
-            Toast.makeText(this, "Başlanğıc koordinatları şəbəkənin daxilində olmalıdır!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Начальные координаты должны быть в пределах сетки!", Toast.LENGTH_SHORT).show();
             return;
         }
 
         isPlaying = true;
         commandText.setText("Oyun başladı!");
-
-        // Начинаем выполнение команд
         gameLoop();
+    }
+
+    private void stopGame(boolean stoppedByButton) {
+        isPlaying = false;
+        isStoppedByButton = stoppedByButton; // Устанавливаем флаг ручной остановки, если это так
+        soundStop.start();
+        commandText.setText("Oyun dayandırıldı. Oyunçu: (" + playerX + ", " + playerY + ")");
+
+        // Если игра не остановлена вручную, перезапускаем через 5 секунд
+        if (!isStoppedByButton) {
+            handler.postDelayed(this::prepareGame, 5000);
+        }
     }
 
     private void gameLoop() {
         if (!isPlaying) return;
 
-        // Генерируем случайную команду (вверх, вниз, влево, вправо)
         String command = generateCommand();
         commandText.setText("Komanda: " + command);
-
-        // Проигрываем звук команды в зависимости от направления
         playSound(command);
 
-        // Обрабатываем команду
         handler.postDelayed(() -> {
             if (isPlaying) {
                 switch (command) {
@@ -135,13 +173,11 @@ public class MainActivity extends AppCompatActivity {
                         break;
                 }
 
-                // Проверяем, вышел ли игрок за границы
                 if (playerX < 1 || playerX > gridWidth || playerY < 1 || playerY > gridHeight) {
-                    stopGame(); // Останавливаем игру, если вышел за границы
+                    stopGame(false); // Останавливаем игру, если игрок вышел за границы
                 } else {
-                    // Выводим положение игрока
                     commandText.setText("Komanda: " + command + " - Oyunçu: (" + playerX + ", " + playerY + ")");
-                    gameLoop(); // Продолжаем игру
+                    gameLoop();
                 }
             }
         }, speed);
@@ -169,34 +205,14 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void stopGame() {
-        isPlaying = false;
-        soundStop.start(); // Воспроизводим звук остановки игры
-        commandText.setText("Oyun dayandırıldı. Oyunçu: (" + playerX + ", " + playerY + ")");
-    }
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (soundUp != null) {
-            soundUp.release(); // Освобождаем ресурсы медиа плеера
-            soundUp = null;
-        }
-        if (soundDown != null) {
-            soundDown.release();
-            soundDown = null;
-        }
-        if (soundLeft != null) {
-            soundLeft.release();
-            soundLeft = null;
-        }
-        if (soundRight != null) {
-            soundRight.release();
-            soundRight = null;
-        }
-        if (soundStop != null) {
-            soundStop.release();
-            soundStop = null;
-        }
+        if (soundUp != null) soundUp.release();
+        if (soundDown != null) soundDown.release();
+        if (soundLeft != null) soundLeft.release();
+        if (soundRight != null) soundRight.release();
+        if (soundStop != null) soundStop.release();
+        if (countdownSound != null) countdownSound.release();
     }
 }
