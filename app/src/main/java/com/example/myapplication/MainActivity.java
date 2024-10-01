@@ -20,6 +20,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Button startButton;
     private Button stopButton;
+    private Button cancelButton; // Новая кнопка для отмены подготовки
     private EditText gridWidthInput;
     private EditText gridHeightInput;
     private EditText speedInput;
@@ -44,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
     private MediaPlayer soundRight;
     private MediaPlayer soundStop;
     private MediaPlayer countdownSound; // Звук для отсчета
+    private MediaPlayer backgroundMusic; // Фоновая музыка
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +61,7 @@ public class MainActivity extends AppCompatActivity {
         // Инициализация элементов интерфейса и медиа плееров
         startButton = findViewById(R.id.startButton);
         stopButton = findViewById(R.id.stopButton);
+        cancelButton = findViewById(R.id.cancelButton); // Инициализация кнопки отмены
         gridWidthInput = findViewById(R.id.gridWidthInput);
         gridHeightInput = findViewById(R.id.gridHeightInput);
         speedInput = findViewById(R.id.speedInput);
@@ -75,7 +78,12 @@ public class MainActivity extends AppCompatActivity {
         soundLeft = MediaPlayer.create(this, R.raw.sola);
         soundRight = MediaPlayer.create(this, R.raw.saga);
         soundStop = MediaPlayer.create(this, R.raw.sag);
-        countdownSound = MediaPlayer.create(this, R.raw.countdown); // Звук отсчета
+        countdownSound = MediaPlayer.create(this, R.raw.countdown1); // Звук отсчета
+
+        // Фоновая музыка
+        backgroundMusic = MediaPlayer.create(this, R.raw.muxa__fon); // Файл фоновой музыки
+        backgroundMusic.setLooping(true); // Зацикливание музыки
+        backgroundMusic.setVolume(0.2f, 0.2f); // Устанавливаем уровень громкости фоновой музыки
 
         // Установка значений по умолчанию
         speedInput.setText(String.valueOf(speed));
@@ -86,6 +94,7 @@ public class MainActivity extends AppCompatActivity {
 
         startButton.setOnClickListener(v -> prepareGame());
         stopButton.setOnClickListener(v -> stopGame(true)); // Остановка по нажатию кнопки
+        cancelButton.setOnClickListener(v -> cancelPreparation()); // Обработчик нажатия кнопки отмены
     }
 
     // Подготовка к началу игры с отсчетом
@@ -96,6 +105,13 @@ public class MainActivity extends AppCompatActivity {
         isStoppedByButton = false; // Сбрасываем флаг ручной остановки
 
         handler.postDelayed(this::startGame, 5000); // Задержка в 5 секунд перед стартом
+    }
+
+    // Метод для отмены подготовки
+    private void cancelPreparation() {
+        handler.removeCallbacksAndMessages(null); // Удалить все запланированные действия
+        commandText.setText("Подготовка отменена."); // Обновление текста на экране
+        isPlaying = false; // Установка флага, чтобы избежать старта игры
     }
 
     private void startGame() {
@@ -134,13 +150,15 @@ public class MainActivity extends AppCompatActivity {
 
         isPlaying = true;
         commandText.setText("Oyun başladı!");
+        backgroundMusic.start(); // Запускаем фоновую музыку
         gameLoop();
     }
 
     private void stopGame(boolean stoppedByButton) {
         isPlaying = false;
         isStoppedByButton = stoppedByButton; // Устанавливаем флаг ручной остановки, если это так
-        soundStop.start();
+        stopSounds(); // Останавливаем звуки направлений
+        soundStop.start(); // Звук остановки игры
         commandText.setText("Oyun dayandırıldı. Oyunçu: (" + playerX + ", " + playerY + ")");
 
         // Если игра не остановлена вручную, перезапускаем через 5 секунд
@@ -205,14 +223,39 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void stopSounds() {
+        if (soundUp.isPlaying()) soundUp.pause();
+        if (soundDown.isPlaying()) soundDown.pause();
+        if (soundLeft.isPlaying()) soundLeft.pause();
+        if (soundRight.isPlaying()) soundRight.pause();
+    }
+
+    // Запуск фоновой музыки, когда экран активен
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (!backgroundMusic.isPlaying()) {
+            backgroundMusic.start(); // Запускаем фоновую музыку при активности экрана
+        }
+    }
+
+    // Остановка фоновой музыки, когда экран неактивен
+    @Override
+    protected void onPause() {
+        super.onPause();
+        backgroundMusic.pause(); // Останавливаем фоновую музыку при неактивности экрана
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (soundUp != null) soundUp.release();
-        if (soundDown != null) soundDown.release();
-        if (soundLeft != null) soundLeft.release();
-        if (soundRight != null) soundRight.release();
-        if (soundStop != null) soundStop.release();
-        if (countdownSound != null) countdownSound.release();
+        // Освобождение ресурсов медиа плееров
+        soundUp.release();
+        soundDown.release();
+        soundLeft.release();
+        soundRight.release();
+        soundStop.release();
+        countdownSound.release();
+        backgroundMusic.release();
     }
 }
