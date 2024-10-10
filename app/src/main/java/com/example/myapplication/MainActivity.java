@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
     private int gridHeight = 5; // По умолчанию 5
     private int playerX;
     private int playerY;
-    private int speed = 3; // По умолчанию 3 секунды
+    private int speed = 3; // По умолчанию 4.5 секунды
     private boolean isPlaying;
     private boolean isStoppedByButton = false; // Новый флаг для ручной остановки
     private Handler handler;

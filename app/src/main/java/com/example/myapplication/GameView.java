@@ -12,8 +12,8 @@ import androidx.annotation.NonNull;
 
 public class GameView extends View {
 
-    private int gridWidth = 10;
-    private int gridHeight = 10;
+    private int gridWidth = 5;
+    private int gridHeight = 5;
     private int playerX = 1;
     private int playerY = 1;
     private int cellWidth;
@@ -50,14 +50,17 @@ public class GameView extends View {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        cellWidth = w / gridWidth;
-        cellHeight = h / gridHeight;
+      //  cellWidth = w / gridWidth;
+       // cellHeight = h / gridHeight;
     }
 
     @Override
     protected void onDraw(@NonNull Canvas canvas) {
         super.onDraw(canvas);
-
+        int w =getWidth();
+        int h =getHeight();
+        cellWidth = w / gridWidth;
+        cellHeight = h / gridHeight;
         // Рисуем сетку
         for (int i = 1; i < gridWidth; i++) {
             canvas.drawLine(i * cellWidth, 0, i * cellWidth, getHeight(), gridPaint);
