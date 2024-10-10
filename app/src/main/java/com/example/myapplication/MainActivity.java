@@ -27,8 +27,9 @@ public class MainActivity extends AppCompatActivity {
     private EditText playerXInput;
     private EditText playerYInput;
     private TextView commandText;
+    private GameView gameView;
 
-    private int gridWidth = 5; // По умолчанию 5
+    private int gridWidth = 5 ;// По умолчанию 5
     private int gridHeight = 5; // По умолчанию 5
     private int playerX;
     private int playerY;
@@ -68,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
         playerXInput = findViewById(R.id.playerXInput);
         playerYInput = findViewById(R.id.playerYInput);
         commandText = findViewById(R.id.commandText);
+        gameView = findViewById(R.id.gameView); // Инициализация GameView
 
         handler = new Handler();
         random = new Random();
@@ -119,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
         try {
             gridWidth = Integer.parseInt(gridWidthInput.getText().toString());
             gridHeight = Integer.parseInt(gridHeightInput.getText().toString());
-            speed = Integer.parseInt(speedInput.getText().toString()) * 1000;
+            speed = Integer.parseInt(speedInput.getText().toString()) * 1500;
             playerX = Integer.parseInt(playerXInput.getText().toString());
             playerY = Integer.parseInt(playerYInput.getText().toString());
         } catch (NumberFormatException e) {
@@ -127,29 +129,17 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        // Проверка корректности ввода
-        if (gridWidth <= 1) {
-            Toast.makeText(this, "Ширина сетки должна быть больше 1!", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        if (gridHeight <= 1) {
-            Toast.makeText(this, "Высота сетки должна быть больше 1!", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        if (speed < 0) {
-            Toast.makeText(this, "Скорость должна быть положительным числом!", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        if (playerX < 1 || playerX > gridWidth || playerY < 1 || playerY > gridHeight) {
-            Toast.makeText(this, "Начальные координаты должны быть в пределах сетки!", Toast.LENGTH_SHORT).show();
+        // Проверка значений перед запуском игры
+        if (gridWidth <= 1 || gridHeight <= 1 || speed < 0 ||
+                playerX < 1 || playerX > gridWidth || playerY < 1 || playerY > gridHeight) {
+            Toast.makeText(this, "Пожалуйста, проверьте параметры сетки и игрока!", Toast.LENGTH_SHORT).show();
             return;
         }
 
         isPlaying = true;
         commandText.setText("Oyun başladı!");
+        gameView.setGrid(gridWidth, gridHeight); // Установите сетку в GameView
+        gameView.setPlayerPosition(playerX, playerY); // Установите позицию игрока в GameView
         backgroundMusic.start(); // Запускаем фоновую музыку
         gameLoop();
     }
@@ -194,7 +184,7 @@ public class MainActivity extends AppCompatActivity {
                 if (playerX < 1 || playerX > gridWidth || playerY < 1 || playerY > gridHeight) {
                     stopGame(false); // Останавливаем игру, если игрок вышел за границы
                 } else {
-                    commandText.setText("Komanda: " + command + " - Oyunçu: (" + playerX + ", " + playerY + ")");
+                    gameView.setPlayerPosition(playerX, playerY); // Обновляем позицию игрока на экране
                     gameLoop();
                 }
             }
@@ -235,27 +225,27 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         if (!backgroundMusic.isPlaying()) {
-            backgroundMusic.start(); // Запускаем фоновую музыку при активности экрана
+            backgroundMusic.start(); // Запускаем фоновую музыку
         }
     }
 
-    // Остановка фоновой музыки, когда экран неактивен
     @Override
     protected void onPause() {
         super.onPause();
-        backgroundMusic.pause(); // Останавливаем фоновую музыку при неактивности экрана
+        if (backgroundMusic.isPlaying()) {
+            backgroundMusic.pause(); // Ставим на паузу, если игра не активна
+        }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // Освобождение ресурсов медиа плееров
         soundUp.release();
         soundDown.release();
         soundLeft.release();
         soundRight.release();
         soundStop.release();
-        countdownSound.release();
-        backgroundMusic.release();
+        countdownSound.release(); // Освобождение ресурсов
+        backgroundMusic.release(); // Освобождение ресурсов фоновой музыки
     }
 }
