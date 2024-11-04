@@ -20,7 +20,7 @@ import java.util.Random;
 public class MainActivity extends AppCompatActivity {
 
     private Button startButton;
-    private Button stopButton;
+
     private Button cancelButton; // Новая кнопка для отмены подготовки
     private EditText gridWidthInput;
     private EditText gridHeightInput;
@@ -31,11 +31,11 @@ public class MainActivity extends AppCompatActivity {
     private CheckBox musicCheckBox;
     private GameView gameView;
 
-    private int gridWidth = 5 ;// По умолчанию 5
-    private int gridHeight = 5; // По умолчанию 5
+    private int gridWidth = 10 ;// По умолчанию 5
+    private int gridHeight = 10; // По умолчанию 5
     private int playerX;
     private int playerY;
-    private int speed = 3; // По умолчанию 4.5 секунды
+    private int speed = 1; // По умолчанию 4.5 секунды
     private boolean isPlaying;
     private boolean isStoppedByButton = false; // Новый флаг для ручной остановки
     private Handler handler;
@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Инициализация элементов интерфейса и медиа плееров
         startButton = findViewById(R.id.startButton);
-        stopButton = findViewById(R.id.stopButton);
+
         cancelButton = findViewById(R.id.cancelButton); // Инициализация кнопки отмены
         gridWidthInput = findViewById(R.id.gridWidthInput);
         gridHeightInput = findViewById(R.id.gridHeightInput);
@@ -110,11 +110,11 @@ public class MainActivity extends AppCompatActivity {
         speedInput.setText(String.valueOf(speed));
         gridWidthInput.setText(String.valueOf(gridWidth));
         gridHeightInput.setText(String.valueOf(gridHeight));
-        playerXInput.setText("3");
-        playerYInput.setText("3");
+        playerXInput.setText("5");
+        playerYInput.setText("5");
 
         startButton.setOnClickListener(v -> prepareGame());
-        stopButton.setOnClickListener(v -> stopGame(true)); // Остановка по нажатию кнопки
+
         cancelButton.setOnClickListener(v -> cancelPreparation()); // Обработчик нажатия кнопки отмены
     }
 
@@ -131,7 +131,7 @@ public class MainActivity extends AppCompatActivity {
     // Метод для отмены подготовки
     private void cancelPreparation() {
         handler.removeCallbacksAndMessages(null); // Удалить все запланированные действия
-        commandText.setText("Подготовка отменена."); // Обновление текста на экране
+        commandText.setText("Oyun dayandı"); // Обновление текста на экране
         isPlaying = false; // Установка флага, чтобы избежать старта игры
     }
 
@@ -159,7 +159,7 @@ public class MainActivity extends AppCompatActivity {
         commandText.setText("Oyun başladı!");
         gameView.setGrid(gridWidth, gridHeight); // Установите сетку в GameView
         gameView.setPlayerPosition(playerX, playerY); // Установите позицию игрока в GameView
-        backgroundMusic.start(); // Запускаем фоновую музыку
+        // backgroundMusic.start(); // Запускаем фоновую музыку
         gameLoop();
     }
 
@@ -241,7 +241,7 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-    // Запуск фоновой музыки, когда экран активен
+  /*  // Запуск фоновой музыки, когда экран активен
     @Override
     protected void onResume() {
         super.onResume();
@@ -256,7 +256,7 @@ public class MainActivity extends AppCompatActivity {
         if (backgroundMusic.isPlaying()) {
             backgroundMusic.pause(); // Ставим на паузу, если игра не активна
         }
-    }
+    }*/
 
     @Override
     protected void onDestroy() {
