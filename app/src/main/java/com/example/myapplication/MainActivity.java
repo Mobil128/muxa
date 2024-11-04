@@ -4,6 +4,7 @@ import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -27,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
     private EditText playerXInput;
     private EditText playerYInput;
     private TextView commandText;
+    private CheckBox musicCheckBox;
     private GameView gameView;
 
     private int gridWidth = 5 ;// По умолчанию 5
@@ -70,6 +72,23 @@ public class MainActivity extends AppCompatActivity {
         playerYInput = findViewById(R.id.playerYInput);
         commandText = findViewById(R.id.commandText);
         gameView = findViewById(R.id.gameView); // Инициализация GameView
+
+        musicCheckBox = findViewById(R.id.musicCheckBox);
+
+// Проверка состояния чекбокса при изменении
+        musicCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                if (!backgroundMusic.isPlaying()) {
+                    backgroundMusic.start(); // Запустить фоновую музыку
+                }
+            } else {
+                if (backgroundMusic.isPlaying()) {
+                    backgroundMusic.pause(); // Поставить фоновую музыку на паузу
+                }
+            }
+        });
+
+
 
         handler = new Handler();
         random = new Random();
@@ -219,6 +238,8 @@ public class MainActivity extends AppCompatActivity {
         if (soundLeft.isPlaying()) soundLeft.pause();
         if (soundRight.isPlaying()) soundRight.pause();
     }
+
+
 
     // Запуск фоновой музыки, когда экран активен
     @Override
