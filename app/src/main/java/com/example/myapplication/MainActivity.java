@@ -140,7 +140,7 @@ public class MainActivity extends AppCompatActivity {
         try {
             gridWidth = Integer.parseInt(gridWidthInput.getText().toString());
             gridHeight = Integer.parseInt(gridHeightInput.getText().toString());
-            speed = Integer.parseInt(speedInput.getText().toString()) * 600;
+            speed = Integer.parseInt(speedInput.getText().toString()) * 900;
             playerX = Integer.parseInt(playerXInput.getText().toString());
             playerY = Integer.parseInt(playerYInput.getText().toString());
         } catch (NumberFormatException e) {
