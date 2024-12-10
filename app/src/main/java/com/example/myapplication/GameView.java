@@ -12,10 +12,10 @@ import androidx.annotation.NonNull;
 
 public class GameView extends View {
 
-    private int gridWidth = 5;
-    private int gridHeight = 5;
-    private int playerX = 1;
-    private int playerY = 1;
+    private int gridWidth = 6;
+    private int gridHeight = 6;
+    private int playerX = 3;
+    private int playerY = 3;
     private int cellWidth;
     private int cellHeight;
     private Paint gridPaint;

@@ -31,8 +31,8 @@ public class MainActivity extends AppCompatActivity {
     private CheckBox musicCheckBox;
     private GameView gameView;
 
-    private int gridWidth = 10 ;// По умолчанию 5
-    private int gridHeight = 10; // По умолчанию 5
+    private int gridWidth = 6 ;// По умолчанию 5
+    private int gridHeight = 6; // По умолчанию 5
     private int playerX;
     private int playerY;
     private int speed = 1; // По умолчанию 4.5 секунды
@@ -94,10 +94,10 @@ public class MainActivity extends AppCompatActivity {
         random = new Random();
 
         // Звуки для направлений и остановки игры
-        soundUp = MediaPlayer.create(this, R.raw.yuxari);
-        soundDown = MediaPlayer.create(this, R.raw.asagi);
-        soundLeft = MediaPlayer.create(this, R.raw.sola);
-        soundRight = MediaPlayer.create(this, R.raw.saga);
+        soundUp = MediaPlayer.create(this, R.raw.yuxari4);
+        soundDown = MediaPlayer.create(this, R.raw.asagi4);
+        soundLeft = MediaPlayer.create(this, R.raw.sola4);
+        soundRight = MediaPlayer.create(this, R.raw.saga4);
         soundStop = MediaPlayer.create(this, R.raw.sag);
         countdownSound = MediaPlayer.create(this, R.raw.countdown1); // Звук отсчета
 
@@ -110,8 +110,8 @@ public class MainActivity extends AppCompatActivity {
         speedInput.setText(String.valueOf(speed));
         gridWidthInput.setText(String.valueOf(gridWidth));
         gridHeightInput.setText(String.valueOf(gridHeight));
-        playerXInput.setText("5");
-        playerYInput.setText("5");
+        playerXInput.setText("3");
+        playerYInput.setText("3");
 
         startButton.setOnClickListener(v -> prepareGame());
 
@@ -140,7 +140,7 @@ public class MainActivity extends AppCompatActivity {
         try {
             gridWidth = Integer.parseInt(gridWidthInput.getText().toString());
             gridHeight = Integer.parseInt(gridHeightInput.getText().toString());
-            speed = Integer.parseInt(speedInput.getText().toString()) * 1500;
+            speed = Integer.parseInt(speedInput.getText().toString()) * 600;
             playerX = Integer.parseInt(playerXInput.getText().toString());
             playerY = Integer.parseInt(playerYInput.getText().toString());
         } catch (NumberFormatException e) {
